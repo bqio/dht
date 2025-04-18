@@ -1,9 +1,9 @@
 import asyncio
 import asyncudp
 import bencode
-import os
+import util
 
-NODE_ID = os.urandom(20)
+NODE_ID = util.generate_node_id()
 
 # KRPC Proto Message
 # t: Transaction ID
@@ -21,18 +21,21 @@ NODE_ID = os.urandom(20)
 
 
 def send_ping(sock: asyncudp.Socket):
-    query = {"t": b"aa", "y": "q", "q": "ping", "a": {"id": NODE_ID}}
+    transaction_id = util.generate_transaction_id()
+    query = {"t": transaction_id, "y": "q", "q": "ping", "a": {"id": NODE_ID}}
     sock.sendto(bencode.encode_dict(query))
 
 
 def send_wrong_packet(sock: asyncudp.Socket):
-    query = {"t": b"aa", "y": "q", "q": "wrong", "a": {"id": NODE_ID}}
+    transaction_id = util.generate_transaction_id()
+    query = {"t": transaction_id, "y": "q", "q": "wrong", "a": {"id": NODE_ID}}
     sock.sendto(bencode.encode_dict(query))
 
 
 def send_find_node(sock: asyncudp.Socket, target_id: bytes):
+    transaction_id = util.generate_transaction_id()
     query = {
-        "t": b"aa",
+        "t": transaction_id,
         "y": "q",
         "q": "find_node",
         "a": {"id": NODE_ID, "target": target_id},
@@ -66,4 +69,5 @@ async def udp_client():
     sock.close()
 
 
-asyncio.run(udp_client())
+if __name__ == "__main__":
+    asyncio.run(udp_client())

@@ -1,9 +1,9 @@
 import asyncio
 import asyncudp
 import bencode
-import os
+import util
 
-NODE_ID = os.urandom(20)
+NODE_ID = util.generate_node_id()
 
 
 def is_ping_packet(packet: dict[str, bencode.SupportedTypes]) -> bool:
@@ -25,7 +25,7 @@ def is_announce_peer_packet(packet: dict[str, bencode.SupportedTypes]) -> bool:
 async def handle_query(sock: asyncudp.Socket, data: bytes, addr: tuple[str, int]):
     packet = bencode.decode_dict(data)
 
-    print(f"Received {packet} from {addr}")
+    print(f"[QUERY] {addr}: {packet}")
 
     if is_ping_packet(packet):
         handle_ping(sock, packet, addr)
@@ -86,7 +86,7 @@ def handle_error(
 
 
 async def udp_server():
-    sock = await asyncudp.create_socket(local_addr=("127.0.0.1", 9999))
+    sock = await asyncudp.create_socket(local_addr=("127.0.0.1", 6881))
 
     print(f"Node ({NODE_ID.hex()}) has been started")
 
